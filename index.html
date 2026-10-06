@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Ajar Interaktif: Usaha dan Energi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0fdf4; /* Light green tint for Islamic nuance */
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #059669; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #10b981;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.5);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden-section { display: none; }
+
+        /* Canvas Game Styles */
+        #gameCanvas, #labCanvas {
+            background-color: #e0f2fe;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            height: 300px;
+            cursor: crosshair;
+        }
+
+        /* Quiz Styles */
+        .option-label {
+            display: block;
+            padding: 12px;
+            margin: 8px 0;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-label:hover { background-color: #f1f5f9; border-color: #cbd5e1; }
+        .option-label input:checked + span { font-weight: bold; color: #059669; }
+        .option-label:has(input:checked) {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+        
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
+
+        /* Arabic text style */
+        .arabic-text {
+            font-family: "Scheherazade New", serif;
+            font-size: 1.5rem;
+            line-height: 2.5rem;
+            text-align: right;
+            direction: rtl;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 shadow-lg z-10 relative">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight"><i class="fas fa-atom mr-2"></i>EduFisika</h1>
+                <p class="text-emerald-100 text-sm">Usaha & Energi - Kelas 8</p>
+            </div>
+            <div class="text-right hidden md:block">
+                <p class="text-sm font-medium">Disusun oleh:</p>
+                <p class="text-sm font-bold text-yellow-300">Alpan Ibrahim S.Si.</p>
+                <p class="text-xs text-emerald-200">MTsN 1 Kota Malang</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden max-w-7xl mx-auto w-full">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="md:hidden fixed bottom-4 right-4 bg-emerald-600 text-white p-4 rounded-full shadow-xl z-50">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="bg-white w-64 shadow-xl flex-shrink-0 flex flex-col z-40 transition-transform transform -translate-x-full md:translate-x-0 absolute md:relative h-full">
+            <div class="p-6">
+                <h2 class="text-lg font-bold text-gray-700 mb-6 uppercase tracking-wider text-center border-b pb-2">Menu Utama</h2>
+                <div class="space-y-2 flex flex-col">
+                    <button onclick="showSection('beranda')" class="nav-button active w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center">
+                        <i class="fas fa-home w-6"></i> Beranda
+                    </button>
+                    <button onclick="showSection('materi')" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center">
+                        <i class="fas fa-book-open w-6"></i> Materi Lengkap
+                    </button>
+                    <button onclick="showSection('integrasi')" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center">
+                        <i class="fas fa-moon w-6"></i> Integrasi Islam
+                    </button>
+                    <button onclick="showSection('analisis')" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center">
+                        <i class="fas fa-brain w-6"></i> Analisis HOTS
+                    </button>
+                    <button onclick="showSection('lab')" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center">
+                        <i class="fas fa-flask w-6"></i> Virtual Lab
+                    </button>
+                    <button onclick="showSection('game')" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center">
+                        <i class="fas fa-gamepad w-6"></i> Game Interaktif
+                    </button>
+                    <button onclick="showSection('quiz')" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center">
+                        <i class="fas fa-tasks w-6"></i> Evaluasi (Quiz)
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-auto p-4 bg-emerald-50 border-t border-emerald-100 text-center md:hidden">
+                <p class="text-xs text-gray-500">Disusun oleh:</p>
+                <p class="text-sm font-bold text-emerald-800">Alpan Ibrahim S.Si.</p>
+                <p class="text-xs text-gray-600">MTsN 1 Kota Malang</p>
+            </div>
+        </nav>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc] relative">
+            
+            <!-- Section: Beranda -->
+            <section id="beranda" class="content-section fade-in">
+                <div class="glass-panel p-8 rounded-2xl text-center max-w-3xl mx-auto mt-10 shadow-lg border-t-4 border-emerald-500">
+                    <img src="https://placehold.co/150x150/10b981/ffffff?text=Fisika" alt="Logo" class="mx-auto rounded-full mb-6 shadow-md border-4 border-white">
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-4">Selamat Datang!</h2>
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                        Di Media Pembelajaran Interaktif <b>Ilmu Pengetahuan Alam (Fisika)</b> Kelas 8. Mari jelajahi keajaiban alam semesta melalui konsep <b>Usaha dan Energi</b>.
+                    </p>
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 mb-8 inline-block text-left">
+                        <h3 class="font-bold text-emerald-800 mb-2"><i class="fas fa-info-circle mr-2"></i>Kompetensi Dasar:</h3>
+                        <p class="text-sm text-gray-700">3.3 Menjelaskan konsep usaha, pesawat sederhana, dan penerapannya dalam kehidupan sehari-hari.</p>
+                    </div>
+                    <div>
+                        <button onclick="showSection('materi')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                            Mulai Belajar <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Materi Lengkap -->
+            <section id="materi" class="content-section hidden-section fade-in max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 border-l-4 border-emerald-500 pl-4">Materi: Usaha & Energi</h2>
+                    <!-- Pagination Controls for Materi -->
+                    <div class="flex space-x-2">
+                        <button onclick="prevMateriPage()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm"><i class="fas fa-chevron-left"></i></button>
+                        <span id="materiPageIndicator" class="font-bold text-emerald-700 py-1 px-2">1 / 4</span>
+                        <button onclick="nextMateriPage()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-sm"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-md bg-white">
+                    
+                    <!-- Materi Page 1: Konsep Usaha -->
+                    <div id="materi-page-1" class="materi-page">
+                        <h3 class="text-2xl font-bold text-emerald-700 mb-4 flex items-center"><i class="fas fa-people-carry mr-3"></i> 1. Konsep Usaha</h3>
+                        <p class="text-gray-700 mb-4 text-justify leading-relaxed">
+                            Dalam kehidupan sehari-hari, kata "usaha" sering diartikan sebagai segala kegiatan untuk mencapai tujuan. Namun, dalam <b>Fisika</b>, definisi usaha sangat spesifik. Usaha didefinisikan sebagai <b>besarnya gaya yang bekerja pada suatu benda sehingga benda tersebut mengalami perpindahan</b>.
+                        </p>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                            <p class="font-semibold text-blue-800">Syarat terjadinya usaha dalam Fisika:</p>
+                            <ol class="list-decimal list-inside text-blue-900 mt-2 space-y-1">
+                                <li>Ada gaya yang bekerja pada benda.</li>
+                                <li>Benda tersebut mengalami perpindahan.</li>
+                                <li>Arah gaya tidak tegak lurus dengan arah perpindahan.</li>
+                            </ol>
+                        </div>
+                        <h4 class="font-bold text-lg text-gray-800 mb-2">Rumus Matematis Usaha</h4>
+                        <div class="bg-gray-100 p-4 rounded-lg text-center mb-4">
+                            <p class="text-2xl font-bold font-serif text-emerald-800">W = F × s</p>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Keterangan:<br>
+                            <b>W</b> = Usaha (Work), satuannya Joule (J)<br>
+                            <b>F</b> = Gaya (Force), satuannya Newton (N)<br>
+                            <b>s</b> = Perpindahan (space), satuannya meter (m)
+                        </p>
+                        <p class="text-gray-700 text-justify">
+                            <b>Contoh:</b> Jika kamu mendorong tembok dengan sangat kuat (Gaya besar) namun tembok tidak bergerak (s = 0), maka menurut fisika, usaha yang kamu lakukan adalah <b>Nol</b> (W = 0).
+                        </p>
+                    </div>
+
+                    <!-- Materi Page 2: Konsep Energi -->
+                    <div id="materi-page-2" class="materi-page hidden">
+                        <h3 class="text-2xl font-bold text-emerald-700 mb-4 flex items-center"><i class="fas fa-bolt mr-3"></i> 2. Konsep Energi</h3>
+                        <p class="text-gray-700 mb-4 text-justify leading-relaxed">
+                            Benda dapat melakukan usaha jika benda tersebut memiliki energi. Oleh karena itu, <b>Energi didefinisikan sebagai kemampuan untuk melakukan usaha (kerja)</b>. Satuan energi sama dengan usaha, yaitu Joule (J).
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mt-6">
+                            <div class="bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-sm">
+                                <h4 class="font-bold text-lg text-amber-800 mb-2 border-b border-amber-200 pb-2"><i class="fas fa-running mr-2"></i> Energi Kinetik (Ek)</h4>
+                                <p class="text-sm text-gray-700 mb-3 text-justify">
+                                    Energi yang dimiliki oleh benda karena geraknya (kecepatannya). Semakin cepat benda bergerak, semakin besar energi kinetiknya.
+                                </p>
+                                <p class="text-center font-bold font-serif text-lg bg-amber-100 p-2 rounded">Ek = ½ m.v²</p>
+                                <p class="text-xs text-gray-600 mt-2">m = massa (kg)<br>v = kecepatan (m/s)</p>
+                            </div>
+                            
+                            <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-200 shadow-sm">
+                                <h4 class="font-bold text-lg text-indigo-800 mb-2 border-b border-indigo-200 pb-2"><i class="fas fa-apple-alt mr-2"></i> Energi Potensial (Ep)</h4>
+                                <p class="text-sm text-gray-700 mb-3 text-justify">
+                                    Energi yang dimiliki benda karena posisi atau kedudukannya (ketinggian) terhadap titik acuan. Contoh: Buah mangga di pohon.
+                                </p>
+                                <p class="text-center font-bold font-serif text-lg bg-indigo-100 p-2 rounded">Ep = m.g.h</p>
+                                <p class="text-xs text-gray-600 mt-2">g = gravitasi (m/s²)<br>h = ketinggian (m)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Materi Page 3: Energi Mekanik & Hubungan -->
+                    <div id="materi-page-3" class="materi-page hidden">
+                        <h3 class="text-2xl font-bold text-emerald-700 mb-4 flex items-center"><i class="fas fa-sync mr-3"></i> 3. Energi Mekanik & Hukum Kekekalan</h3>
+                        
+                        <h4 class="font-bold text-lg text-gray-800 mt-4 mb-2">Energi Mekanik (Em)</h4>
+                        <p class="text-gray-700 mb-4 text-justify">
+                            Energi mekanik adalah jumlah total dari energi kinetik dan energi potensial suatu benda.
+                            <br><span class="font-bold bg-gray-100 px-2 py-1 rounded inline-block mt-2">Em = Ep + Ek</span>
+                        </p>
+
+                        <div class="bg-emerald-50 border border-emerald-300 p-5 rounded-xl shadow-inner mb-6">
+                            <h4 class="font-bold text-emerald-800 mb-2 text-center border-b border-emerald-200 pb-2">Hukum Kekekalan Energi Mekanik</h4>
+                            <p class="text-sm text-gray-700 text-center italic mb-3">
+                                "Pada sistem yang terisolasi (hanya bekerja gaya konservatif seperti gravitasi), energi mekanik total suatu benda adalah konstan (tetap)."
+                            </p>
+                            <p class="text-center font-bold font-serif text-lg">Em₁ = Em₂</p>
+                            <p class="text-center font-bold font-serif text-md text-emerald-700">Ep₁ + Ek₁ = Ep₂ + Ek₂</p>
+                        </div>
+
+                        <h4 class="font-bold text-lg text-gray-800 mt-4 mb-2">Teorema Usaha - Energi</h4>
+                        <p class="text-gray-700 text-justify">
+                            Usaha yang dilakukan oleh resultan gaya pada suatu benda sama dengan perubahan energi kinetiknya, atau sama dengan minus perubahan energi potensialnya.<br>
+                            <b>W = ΔEk = Ek₂ - Ek₁</b><br>
+                            <b>W = -ΔEp = -(Ep₂ - Ep₁)</b>
+                        </p>
+                    </div>
+
+                    <!-- Materi Page 4: Daya -->
+                    <div id="materi-page-4" class="materi-page hidden">
+                        <h3 class="text-2xl font-bold text-emerald-700 mb-4 flex items-center"><i class="fas fa-stopwatch mr-3"></i> 4. Daya (Power)</h3>
+                        <p class="text-gray-700 mb-4 text-justify">
+                            Dalam fisika, seringkali kita tidak hanya peduli pada seberapa besar usaha yang dilakukan, tetapi juga seberapa cepat usaha tersebut dilakukan. Kecepatan melakukan usaha ini disebut <b>Daya</b>.
+                        </p>
+                        
+                        <div class="flex flex-col md:flex-row items-center gap-6 my-6">
+                            <div class="flex-1 bg-gray-100 p-6 rounded-xl text-center">
+                                <h4 class="font-bold text-gray-800 mb-2">Rumus Daya</h4>
+                                <p class="text-3xl font-bold font-serif text-emerald-800 border-b-2 border-emerald-800 inline-block pb-1">P = W / t</p>
+                                <p class="mt-4 text-left text-sm text-gray-600">
+                                    <b>P</b> = Daya (Watt)<br>
+                                    <b>W</b> = Usaha (Joule)<br>
+                                    <b>t</b> = Waktu (sekon/detik)
+                                </p>
+                            </div>
+                            <div class="flex-1 text-sm text-gray-700 text-justify leading-relaxed">
+                                <b>Ilustrasi:</b> Ada dua mesin pompa air. Mesin A bisa memindahkan 1000 liter air ke tangki atas dalam waktu 10 menit. Mesin B bisa melakukan hal yang sama (usaha yang sama) dalam waktu 5 menit. <br><br>
+                                Karena Mesin B memerlukan waktu lebih singkat untuk usaha yang sama, maka Mesin B memiliki <b>Daya yang lebih besar</b>. (1 Watt = 1 Joule/sekon).
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Section: Integrasi Islam -->
+            <section id="integrasi" class="content-section hidden-section fade-in max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 border-l-4 border-emerald-500 pl-4 mb-6">Integrasi Nilai-Nilai Islam</h2>
+                <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-md bg-white space-y-6">
+                    
+                    <p class="text-gray-700 text-justify leading-relaxed mb-6">
+                        Ilmu fisika, termasuk konsep usaha dan energi, pada hakikatnya adalah upaya manusia untuk memahami sunnatullah (hukum-hukum Allah yang berlaku di alam semesta). Al-Qur'an banyak memberikan isyarat tentang konsep-konsep ini.
+                    </p>
+
+                    <!-- Ayat 1: Usaha Manusia -->
+                    <div class="bg-[#f0fdf4] border-l-4 border-emerald-500 p-5 rounded-r-xl shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-emerald-600 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">1</span>
+                            <h3 class="font-bold text-lg text-emerald-900">Konsep "Usaha" (Ikhtiar)</h3>
+                        </div>
+                        <p class="text-right text-2xl mb-3 mt-4 text-emerald-800" style="font-family: 'Scheherazade New', serif;" dir="rtl">
+                            إِنَّ سَعْيَكُمْ لَشَتَّىٰ
+                        </p>
+                        <p class="italic text-gray-600 mb-2">"Sesungguhnya usaha kamu memang berbeda-beda." <b>(QS. Al-Lail: 4)</b></p>
+                        <p class="text-sm text-gray-700 text-justify">
+                            <b>Refleksi Sains:</b> Dalam fisika, usaha didefinisikan sebagai gaya dikali perpindahan. Nilai usaha bisa positif, negatif, atau nol. Hal ini linier dengan ayat di atas. Usaha manusia di dunia bermacam-macam bentuknya, ada usaha yang positif (membawa kebaikan/pahala), negatif (dosa), atau sia-sia (nol). Usaha fisika memerlukan gaya, begitu pula ikhtiar manusia memerlukan kemauan dan tenaga untuk berpindah dari kondisi buruk ke kondisi baik.
+                        </p>
+                    </div>
+
+                    <!-- Ayat 2: Keteraturan Energi & Alam -->
+                    <div class="bg-[#f0fdf4] border-l-4 border-teal-500 p-5 rounded-r-xl shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-teal-600 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">2</span>
+                            <h3 class="font-bold text-lg text-teal-900">Ketepatan Hukum Energi (Ketetapan Ukuran)</h3>
+                        </div>
+                        <p class="text-right text-2xl mb-3 mt-4 text-teal-800" style="font-family: 'Scheherazade New', serif;" dir="rtl">
+                            إِنَّا كُلَّ شَيْءٍ خَلَقْنَاهُ بِقَدَرٍ
+                        </p>
+                        <p class="italic text-gray-600 mb-2">"Sesungguhnya Kami menciptakan segala sesuatu menurut ukuran." <b>(QS. Al-Qamar: 49)</b></p>
+                        <p class="text-sm text-gray-700 text-justify">
+                            <b>Refleksi Sains:</b> Konsep <i>Hukum Kekekalan Energi</i> (Energi tidak dapat diciptakan atau dimusnahkan, hanya berubah bentuk) menunjukkan bahwa alam semesta ini diciptakan dengan sistem takaran dan keseimbangan matematis yang luar biasa presisi oleh Allah SWT. Tidak ada energi yang hilang begitu saja, semuanya sudah terukur (<i>bi qadar</i>).
+                        </p>
+                    </div>
+
+                    <!-- Ayat 3: Sumber Energi -->
+                    <div class="bg-[#f0fdf4] border-l-4 border-green-500 p-5 rounded-r-xl shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-green-600 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">3</span>
+                            <h3 class="font-bold text-lg text-green-900">Perubahan Energi sebagai Rahmat</h3>
+                        </div>
+                        <p class="text-sm text-gray-700 text-justify">
+                            Allah SWT menjadikan matahari sebagai sumber energi panas dan cahaya (Energi Radiasi), yang kemudian diserap tumbuhan (Energi Kimia), dan dikonsumsi manusia untuk menghasilkan energi gerak (Kinetik). Rantai konversi energi ini disinggung dalam banyak ayat yang meminta manusia bersyukur atas segala karunia alamwi. Penggunaan energi secara bijak juga merupakan bentuk menghindari sifat <i>mubazir</i> (membuang-buang).
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Section: Analisis HOTS -->
+            <section id="analisis" class="content-section hidden-section fade-in max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 border-l-4 border-red-500 pl-4 mb-6">Analisis Tingkat Atas (HOTS)</h2>
+                <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-md bg-white">
+                    <p class="text-gray-700 text-justify mb-6">
+                        Mari tingkatkan pemahaman konsepmu dengan menganalisis fenomena fisika yang lebih kompleks. <i>Higher Order Thinking Skills</i> (HOTS) menuntutmu untuk tidak sekadar menghafal rumus, tetapi mensintesis dan mengevaluasi masalah.
+                    </p>
+
+                    <!-- Kasus HOTS 1 -->
+                    <div class="border-2 border-gray-200 rounded-xl overflow-hidden mb-6">
+                        <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                            <h3 class="font-bold text-gray-800"><i class="fas fa-search-plus text-red-500 mr-2"></i> Studi Kasus 1: Roller Coaster dan Gaya Gesek</h3>
+                        </div>
+                        <div class="p-5 bg-white">
+                            <p class="text-sm text-gray-700 mb-3 text-justify">
+                                <b>Skenario:</b> Sebuah kereta roller coaster bermassa 500 kg meluncur dari keadaan diam di puncak A pada ketinggian 40 meter. Sesuai Hukum Kekekalan Energi Mekanik, seharusnya kereta bisa mencapai puncak C (ketinggian 40m) di ujung lintasan. Namun dalam praktiknya, kereta berhenti di titik B yang tingginya hanya 35 meter.
+                            </p>
+                            <div class="bg-red-50 p-4 rounded text-sm text-red-900 border border-red-200 mb-4">
+                                <b>Pertanyaan Analisis:</b> Ke mana hilangnya sisa energi tersebut? Apakah hukum kekekalan energi berlaku dalam sistem dunia nyata?
+                            </div>
+                            <div class="text-sm text-gray-700 text-justify space-y-2">
+                                <p><b>Pemecahan (Analisis):</b></p>
+                                <p>Hukum Kekekalan Energi Mekanik (Em konstan) <b>hanya berlaku pada sistem konservatif</b> (dimana gaya gesekan = 0).</p>
+                                <p>Di dunia nyata, terdapat <b>Gaya Non-Konservatif</b> yaitu <i>Gaya Gesekan</i> antara roda dan rel, serta <i>Hambatan Udara</i>. Gaya-gaya ini melakukan usaha negatif yang merubah energi mekanik menjadi energi bentuk lain (biasanya Energi Panas/Kalor dan Bunyi).</p>
+                                <p>Jadi, energi tidak "hilang" (Hukum Termodinamika I / Kekekalan Energi Umum tetap berlaku), melainkan berubah wujud. <br>
+                                <b>W<sub>non-konservatif</sub> = ΔEm = Em<sub>akhir</sub> - Em<sub>awal</sub></b>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kasus HOTS 2 -->
+                    <div class="border-2 border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                            <h3 class="font-bold text-gray-800"><i class="fas fa-chart-line text-blue-500 mr-2"></i> Studi Kasus 2: Mengerem Mobil</h3>
+                        </div>
+                        <div class="p-5 bg-white">
+                            <p class="text-sm text-gray-700 mb-3 text-justify">
+                                <b>Skenario:</b> Mobil A melaju dengan kecepatan 30 km/jam memerlukan jarak pengereman sejauh 10 meter untuk berhenti total. Jika mobil yang sama melaju 2 kali lipat lebih cepat yaitu 60 km/jam, berapa jarak pengereman yang dibutuhkan dengan gaya rem yang sama?
+                            </p>
+                            <div class="bg-blue-50 p-4 rounded text-sm text-blue-900 border border-blue-200 mb-4">
+                                <b>Banyak orang menjawab:</b> 20 meter (2 kali lipat). Apakah itu benar?
+                            </div>
+                            <div class="text-sm text-gray-700 text-justify space-y-2">
+                                <p><b>Pemecahan (Evaluasi):</b> Salah! Jawabannya bukan 20 meter.</p>
+                                <p>Mari gunakan teorema Usaha-Energi: <b>W = ΔEk</b></p>
+                                <p>Usaha oleh rem (F × s) digunakan untuk menghilangkan Energi Kinetik (½ m.v²).<br>
+                                F × s = ½ m.v²  (Karena v akhir 0)<br>
+                                s berbanding lurus dengan v² (kuadrat kecepatan).</p>
+                                <p class="bg-gray-100 p-2 rounded inline-block font-bold">s ∝ v²</p>
+                                <p>Jika kecepatan dikalikan 2 (v menjadi 2v), maka energi kinetiknya menjadi (2)² = 4 kali lipat! Karena energi kinetiknya 4 kali lebih besar, usaha rem (jarak s) juga harus <b>4 kali lebih panjang</b>.</p>
+                                <p><b>Kesimpulan:</b> Jarak pengereman yang dibutuhkan adalah 4 × 10m = <b>40 meter</b>. Inilah alasan fisika mengapa ngebut sangat berbahaya dan peluang kecelakaannya meningkat secara kuadratik, bukan linier!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Section: Virtual Lab -->
+            <section id="lab" class="content-section hidden-section fade-in max-w-5xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 border-l-4 border-indigo-500 pl-4 mb-2">Virtual Lab: Free Fall & Konservasi Energi</h2>
+                <p class="text-gray-600 mb-4 text-sm">Simulasikan benda jatuh bebas untuk mengamati perubahan Energi Potensial (Ep) menjadi Energi Kinetik (Ek). Asumsikan tanpa gesekan udara.</p>
+                
+                <div class="glass-panel p-4 md:p-6 rounded-2xl shadow-md bg-white flex flex-col lg:flex-row gap-6">
+                    <!-- Control Panel -->
+                    <div class="w-full lg:w-1/3 bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Massa Benda (m): <span id="labMassVal" class="text-indigo-600">2</span> kg</label>
+                            <input type="range" id="labMass" min="1" max="10" step="1" value="2" class="w-full accent-indigo-600">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Ketinggian Awal (h): <span id="labHeightVal" class="text-indigo-600">100</span> m</label>
+                            <input type="range" id="labHeight" min="50" max="200" step="10" value="100" class="w-full accent-indigo-600">
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button id="btnLabStart" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded shadow">Jatuhkan!</button>
+                            <button id="btnLabReset" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded shadow">Reset</button>
+                        </div>
+
+                        <!-- Data Dashboard -->
+                        <div class="mt-4 p-3 bg-white border border-gray-200 rounded-lg text-xs space-y-2 font-mono">
+                            <div class="flex justify-between"><span>Gravitasi (g):</span> <span>9.8 m/s²</span></div>
+                            <div class="flex justify-between"><span>Ketinggian saat ini (y):</span> <span id="dataY">100.0 m</span></div>
+                            <div class="flex justify-between"><span>Kecepatan (v):</span> <span id="dataV">0.0 m/s</span></div>
+                            <hr class="my-1">
+                            <div class="flex justify-between text-blue-600 font-bold"><span>Energi Potensial (Ep):</span> <span id="dataEp">0 J</span></div>
+                            <div class="flex justify-between text-red-600 font-bold"><span>Energi Kinetik (Ek):</span> <span id="dataEk">0 J</span></div>
+                            <div class="flex justify-between text-purple-700 font-extrabold border-t border-purple-200 pt-1 mt-1"><span>Total Energi (Em):</span> <span id="dataEm">0 J</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Simulation Canvas -->
+                    <div class="w-full lg:w-2/3 flex flex-col relative h-[400px]">
+                        <canvas id="labCanvas" class="w-full h-full bg-[#f0f9ff] border-2 border-indigo-200 rounded-lg rounded-b-none"></canvas>
+                        <!-- Ground representation -->
+                        <div class="h-8 bg-green-600 rounded-b-lg border-2 border-t-0 border-indigo-200 flex items-center justify-center">
+                            <span class="text-white text-xs font-bold uppercase tracking-widest">Permukaan Tanah (Acuan Ep = 0)</span>
+                        </div>
+
+                        <!-- Graph Overlay -->
+                        <div class="absolute top-4 right-4 bg-white/80 p-2 rounded shadow-sm border border-gray-300 w-32 backdrop-blur-sm pointer-events-none">
+                            <div class="text-[10px] font-bold text-center mb-1 text-gray-600">Grafik Energi</div>
+                            <div class="flex items-end h-20 gap-1 mx-auto justify-center">
+                                <div class="w-6 bg-blue-500 rounded-t relative">
+                                    <div id="barEp" class="absolute bottom-0 w-full bg-blue-500 transition-all duration-75" style="height: 100%;"></div>
+                                </div>
+                                <div class="w-6 bg-red-500 rounded-t relative">
+                                    <div id="barEk" class="absolute bottom-0 w-full bg-red-500 transition-all duration-75" style="height: 0%;"></div>
+                                </div>
+                                <div class="w-6 bg-purple-500 rounded-t relative">
+                                    <div id="barEm" class="absolute bottom-0 w-full bg-purple-500" style="height: 100%;"></div>
+                                </div>
+                            </div>
+                            <div class="flex text-[8px] font-bold text-gray-500 mt-1 justify-center gap-[10px]">
+                                <span>Ep</span><span>Ek</span><span>Em</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Game -->
+            <section id="game" class="content-section hidden-section fade-in max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 border-l-4 border-yellow-500 pl-4 mb-2">Game: Dorong Balok Usaha!</h2>
+                <p class="text-gray-600 mb-4 text-sm">Ketuk tombol dorong berulang kali untuk memberikan gaya (F) agar kotak berpindah (s) mencapai garis finish. Semakin berat kotak, gaya gesek makin besar!</p>
+                
+                <div class="glass-panel p-6 rounded-2xl shadow-md bg-white border-2 border-yellow-100">
+                    <div class="flex justify-between items-center mb-4 text-sm font-bold bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                        <div>Skor Usaha (W): <span id="gameScore" class="text-yellow-600 text-lg">0</span> Joule</div>
+                        <div class="flex gap-4">
+                            <div>Massa Balok: 
+                                <select id="gameDifficulty" class="ml-1 p-1 rounded bg-white border border-gray-300">
+                                    <option value="1">Ringan (Kayu)</option>
+                                    <option value="2">Sedang (Batu)</option>
+                                    <option value="3">Berat (Besi)</option>
+                                </select>
+                            </div>
+                            <div>Gaya (F): <span id="gameForceShow">100</span> N</div>
+                        </div>
+                    </div>
+
+                    <div class="relative h-40 bg-gray-100 border-b-4 border-gray-800 rounded-t-xl overflow-hidden shadow-inner">
+                        <!-- Finish Line -->
+                        <div class="absolute right-8 top-0 bottom-0 w-4 bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,#000_5px,#000_10px)] opacity-50 z-0"></div>
+                        <div class="absolute right-4 top-10 font-bold text-gray-500 z-0">FINISH</div>
+                        
+                        <!-- Track markers -->
+                        <div class="absolute bottom-0 w-full flex justify-between px-2 text-[10px] text-gray-400">
+                            <span>0m</span><span>2m</span><span>4m</span><span>6m</span><span>8m</span><span>10m</span>
+                        </div>
+
+                        <!-- Player Box -->
+                        <div id="playerBox" class="absolute left-2 bottom-0 w-12 h-12 bg-yellow-500 border-2 border-yellow-700 rounded-sm shadow-md flex items-center justify-center font-bold text-white z-10 transition-transform" style="transform: translateX(0px);">
+                            📦
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 text-center space-y-4">
+                        <p id="gameMessage" class="text-sm font-bold text-gray-700 h-5"></p>
+                        <button id="btnPush" class="bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 active:scale-95 text-white font-bold py-4 px-10 rounded-full shadow-[0_5px_0_#b45309] text-xl transition-all">
+                            DORONG (F) <i class="fas fa-hand-rock ml-2"></i>
+                        </button>
+                        <br>
+                        <button id="btnGameReset" class="text-sm text-gray-500 hover:text-gray-800 underline mt-2">Ulangi Game</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Quiz -->
+            <section id="quiz" class="content-section hidden-section fade-in max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 border-l-4 border-rose-500 pl-4 mb-2">Evaluasi Pembelajaran</h2>
+                <p class="text-gray-600 mb-6 text-sm">Kerjakan 20 soal pilihan ganda berikut untuk menguji pemahamanmu tentang Usaha dan Energi, termasuk soal HOTS.</p>
+
+                <!-- Quiz Intro/Result Container -->
+                <div id="quizContainer" class="glass-panel p-6 md:p-8 rounded-2xl shadow-md bg-white">
+                    <div id="quizStartPanel" class="text-center">
+                        <i class="fas fa-tasks text-6xl text-rose-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Siap untuk Quiz?</h3>
+                        <p class="text-gray-600 mb-6">Waktu tidak dibatasi. Pilih jawaban yang paling tepat.</p>
+                        <button onclick="startQuiz()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                            Mulai Quiz
+                        </button>
+                    </div>
+
+                    <!-- Quiz Question Area -->
+                    <div id="quizQuestionPanel" class="hidden">
+                        <div class="flex justify-between items-center mb-4 text-sm font-bold text-gray-500 border-b pb-2">
+                            <span>Soal <span id="qNumber" class="text-rose-600 text-lg">1</span> dari 20</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full"><i class="fas fa-star text-yellow-400"></i> Skor: <span id="qScore">0</span></span>
+                        </div>
+                        
+                        <p id="questionText" class="text-lg font-medium text-gray-800 mb-6 text-justify"></p>
+                        
+                        <div id="optionsContainer" class="space-y-3">
+                            <!-- Options injected by JS -->
+                        </div>
+
+                        <div class="mt-6 flex justify-between items-center">
+                            <span id="feedbackText" class="font-bold text-sm hidden"></span>
+                            <button id="btnNextQuestion" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2 rounded-lg font-bold shadow hidden transition-all">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Result Area -->
+                    <div id="quizResultPanel" class="hidden text-center fade-in">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Quiz Selesai!</h3>
+                        <p class="text-gray-600 mb-4">Inilah hasil pencapaianmu:</p>
+                        
+                        <div class="bg-rose-50 border-4 border-rose-200 w-40 h-40 mx-auto rounded-full flex flex-col items-center justify-center mb-6 shadow-inner">
+                            <span class="text-5xl font-black text-rose-600" id="finalScore">100</span>
+                            <span class="text-sm font-bold text-rose-400">/ 100</span>
+                        </div>
+                        
+                        <p id="resultMessage" class="text-lg font-medium text-gray-700 mb-6"></p>
+                        
+                        <button onclick="resetQuiz()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-6 rounded-lg shadow mr-2">
+                            <i class="fas fa-redo"></i> Coba Lagi
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // --- Navigation Logic ---
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.add('hidden-section');
+                sec.classList.remove('fade-in'); // Reset animation
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Show target section and add active class to button
+            const target = document.getElementById(sectionId);
+            if(target) {
+                target.classList.remove('hidden-section');
+                // Force reflow to restart animation
+                void target.offsetWidth; 
+                target.classList.add('fade-in');
+            }
+            
+            // Highlight nav menu based on onclick attribute matching sectionId
+            const activeBtn = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            if(window.innerWidth < 768) {
+                 sidebar.classList.add('-translate-x-full');
+            }
+
+            // Specific section initializations
+            if(sectionId === 'lab' && !labRunning) initLab();
+            if(sectionId === 'game') resetGame();
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // --- Materi Pagination Logic ---
+        let currentMateriPage = 1;
+        const totalMateriPages = 4;
+
+        function updateMateriView() {
+            for(let i=1; i<=totalMateriPages; i++) {
+                document.getElementById(`materi-page-${i}`).classList.add('hidden');
+            }
+            document.getElementById(`materi-page-${currentMateriPage}`).classList.remove('hidden');
+            document.getElementById('materiPageIndicator').innerText = `${currentMateriPage} / ${totalMateriPages}`;
+        }
+
+        function nextMateriPage() {
+            if(currentMateriPage < totalMateriPages) {
+                currentMateriPage++;
+                updateMateriView();
+            }
+        }
+        function prevMateriPage() {
+            if(currentMateriPage > 1) {
+                currentMateriPage--;
+                updateMateriView();
+            }
+        }
+
+        // --- Virtual Lab Physics Simulation ---
+        const labCanvas = document.getElementById('labCanvas');
+        const ctx = labCanvas.getContext('2d');
+        let labAnimId;
+        let labRunning = false;
+        let labState = {
+            m: 2,       // mass (kg)
+            h0: 100,    // initial height (m)
+            y: 100,     // current height (m)
+            v: 0,       // velocity (m/s)
+            t: 0,       // time (s)
+            g: 9.8,     // gravity (m/s^2)
+            dropping: false,
+            scale: 0    // pixels per meter
+        };
+
+        const ballRadius = 15;
+
+        function initLab() {
+            resizeCanvas();
+            updateLabValues();
+            drawLab();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            const container = labCanvas.parentElement;
+            labCanvas.width = container.clientWidth;
+            // fixed height handled by CSS, just match it
+            labCanvas.height = 368; // 400 - 32(ground)
+            labState.scale = (labCanvas.height - ballRadius - 10) / 200; // max height 200m
+            drawLab();
+        }
+
+        // DOM Elements
+        const inpMass = document.getElementById('labMass');
+        const inpHt = document.getElementById('labHeight');
+        const btnStart = document.getElementById('btnLabStart');
+        const btnReset = document.getElementById('btnLabReset');
+
+        inpMass.addEventListener('input', (e) => {
+            if(!labState.dropping) {
+                labState.m = parseFloat(e.target.value);
+                document.getElementById('labMassVal').innerText = labState.m;
+                updateLabValues();
+            }
+        });
+        inpHt.addEventListener('input', (e) => {
+            if(!labState.dropping) {
+                labState.h0 = parseFloat(e.target.value);
+                labState.y = labState.h0;
+                document.getElementById('labHeightVal').innerText = labState.h0;
+                updateLabValues();
+                drawLab();
+            }
+        });
+
+        btnStart.addEventListener('click', () => {
+            if(!labState.dropping) {
+                labState.dropping = true;
+                labState.t = Date.now();
+                inpHt.disabled = true;
+                inpMass.disabled = true;
+                labLoop();
+            }
+        });
+
+        btnReset.addEventListener('click', () => {
+            cancelAnimationFrame(labAnimId);
+            labState.dropping = false;
+            labState.y = labState.h0;
+            labState.v = 0;
+            inpHt.disabled = false;
+            inpMass.disabled = false;
+            updateLabValues();
+            drawLab();
+        });
+
+        function updateLabValues() {
+            let ep = labState.m * labState.g * labState.y;
+            let ek = 0.5 * labState.m * labState.v * labState.v;
+            let em = labState.m * labState.g * labState.h0; // Initial Em
+
+            // Prevent floating point errors showing slight Em variation
+            if(labState.y <= 0) {
+                ep = 0;
+                ek = em; // perfectly elastic at ground check
+            }
+
+            document.getElementById('dataY').innerText = labState.y.toFixed(1) + ' m';
+            document.getElementById('dataV').innerText = Math.abs(labState.v).toFixed(1) + ' m/s';
+            document.getElementById('dataEp').innerText = Math.round(ep) + ' J';
+            document.getElementById('dataEk').innerText = Math.round(ek) + ' J';
+            document.getElementById('dataEm').innerText = Math.round(em) + ' J';
+
+            // Update Bars
+            let pEp = (ep / em) * 100;
+            let pEk = (ek / em) * 100;
+            document.getElementById('barEp').style.height = `${Math.max(0, pEp)}%`;
+            document.getElementById('barEk').style.height = `${Math.max(0, pEk)}%`;
+            document.getElementById('barEm').style.height = '100%';
+        }
+
+        function drawLab() {
+            ctx.clearRect(0, 0, labCanvas.width, labCanvas.height);
+            
+            // Draw height scale ruler
+            ctx.beginPath();
+            ctx.moveTo(30, 0);
+            ctx.lineTo(30, labCanvas.height);
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px Arial';
+            for(let i=0; i<=200; i+=50) {
+                let py = labCanvas.height - (i * labState.scale);
+                if(i===0) py = labCanvas.height;
+                ctx.fillText(i+'m', 5, py);
+                ctx.beginPath();
+                ctx.moveTo(25, py);
+                ctx.lineTo(35, py);
+                ctx.stroke();
+            }
+
+            // Draw Ball
+            let pixelY = labCanvas.height - (labState.y * labState.scale) - ballRadius;
+            
+            ctx.beginPath();
+            ctx.arc(labCanvas.width / 2, pixelY, ballRadius, 0, Math.PI * 2);
+            
+            // Gradient ball
+            let grd = ctx.createRadialGradient(labCanvas.width/2 - 5, pixelY - 5, 2, labCanvas.width/2, pixelY, ballRadius);
+            grd.addColorStop(0, '#818cf8');
+            grd.addColorStop(1, '#4338ca');
+            ctx.fillStyle = grd;
+            ctx.fill();
+            ctx.strokeStyle = '#312e81';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Draw mass label
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(labState.m + 'kg', labCanvas.width / 2, pixelY + 4);
+            ctx.textAlign = 'left'; // reset
+        }
+
+        function labLoop() {
+            if(!labState.dropping) return;
+
+            let now = Date.now();
+            let dt = (now - labState.t) / 1000; // delta time in seconds
+            // Time multiplier to make simulation visible but fast enough
+            let simDt = dt * 2.5; 
+            labState.t = now;
+
+            // Kinematics v = v0 + at, y = y0 + v0t + 1/2at^2
+            labState.y = labState.y - (labState.v * simDt + 0.5 * labState.g * simDt * simDt);
+            labState.v = labState.v + (labState.g * simDt); // v is positive downwards here for simplicity
+
+            if(labState.y <= 0) {
+                labState.y = 0;
+                labState.dropping = false; // Stop at ground
+            }
+
+            updateLabValues();
+            drawLab();
+
+            if(labState.dropping) {
+                labAnimId = requestAnimationFrame(labLoop);
+            }
+        }
+
+
+        // --- Game Logic: Push the Box ---
+        const playerBox = document.getElementById('playerBox');
+        const gameScoreEl = document.getElementById('gameScore');
+        const btnPush = document.getElementById('btnPush');
+        const msgEl = document.getElementById('gameMessage');
+        const diffSelect = document.getElementById('gameDifficulty');
+        
+        let gameState = {
+            pos: 0,      // position 0 to 100 (%)
+            force: 100,  // Force applied per click
+            friction: 5, // Friction opposing move (percentage decay)
+            scoreW: 0,
+            massMult: 1,
+            maxDist: 10, // meters
+            pixelWidth: 0,
+            playing: true
+        };
+
+        let frictionInterval;
+
+        function resetGame() {
+            gameState.pos = 0;
+            gameState.scoreW = 0;
+            gameState.playing = true;
+            updateBoxPos();
+            gameScoreEl.innerText = '0';
+            msgEl.innerText = '';
+            msgEl.className = "text-sm font-bold text-gray-700 h-5";
+            btnPush.disabled = false;
+            btnPush.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            clearInterval(frictionInterval);
+            frictionInterval = setInterval(applyFriction, 100);
+            updateGameConfig();
+        }
+
+        function updateGameConfig() {
+            let diff = parseInt(diffSelect.value);
+            if(diff === 1) { gameState.massMult = 1; gameState.force = 100; gameState.friction = 0.5; }
+            if(diff === 2) { gameState.massMult = 2; gameState.force = 200; gameState.friction = 1.2; }
+            if(diff === 3) { gameState.massMult = 3; gameState.force = 300; gameState.friction = 2.5; }
+            document.getElementById('gameForceShow').innerText = gameState.force;
+        }
+
+        diffSelect.addEventListener('change', () => {
+            updateGameConfig();
+            resetGame();
+        });
+
+        document.getElementById('btnGameReset').addEventListener('click', resetGame);
+
+        btnPush.addEventListener('click', () => {
+            if(!gameState.playing) return;
+            
+            // Move forward (e.g. 5% of track per click minus mass penalty)
+            let moveStep = 5 / gameState.massMult; 
+            gameState.pos += moveStep;
+            
+            // Calculate work: W = F * s (s is incremental distance in meters)
+            // track is 10m total. so delta s = (moveStep/100) * 10
+            let ds = (moveStep/100) * gameState.maxDist;
+            let workDone = gameState.force * ds;
+            gameState.scoreW += workDone;
+            
+            gameScoreEl.innerText = Math.round(gameState.scoreW);
+
+            if(gameState.pos >= 90) { // Reached finish line area (right padding)
+                gameState.pos = 90;
+                winGame();
+            }
+            updateBoxPos();
+        });
+
+        function applyFriction() {
+            if(!gameState.playing || gameState.pos <= 0) return;
+            
+            gameState.pos -= gameState.friction;
+            if(gameState.pos < 0) gameState.pos = 0;
+            updateBoxPos();
+        }
+
+        function updateBoxPos() {
+            const trackWidth = document.getElementById('playerBox').parentElement.clientWidth;
+            // 48 is width of box roughly
+            const maxPx = trackWidth - 48 - 16; // 16 is right padding
+            const pxMove = (gameState.pos / 100) * maxPx;
+            playerBox.style.transform = `translateX(${pxMove}px)`;
+        }
+
+        function winGame() {
+            gameState.playing = false;
+            clearInterval(frictionInterval);
+            btnPush.disabled = true;
+            btnPush.classList.add('opacity-50', 'cursor-not-allowed');
+            msgEl.innerText = `Luar Biasa! Kamu melakukan Usaha sebesar ${Math.round(gameState.scoreW)} Joule.`;
+            msgEl.className = "text-md font-bold text-green-600 h-5 animate-pulse";
+        }
+
+        // --- Quiz System ---
+        const quizData = [
+            // Konsep Dasar Usaha
+            { q: "Menurut fisika, usaha didefinisikan sebagai...", 
+              o: ["Segala aktivitas yang mengeluarkan keringat", "Hasil kali antara gaya dan perpindahan searah gaya", "Kemampuan untuk melakukan kerja", "Gaya yang diberikan pada benda diam"], a: 1 },
+            { q: "Seorang anak mendorong tembok sekolahan dengan gaya 500 N, namun tembok tidak bergerak. Berapa usaha yang dilakukan anak tersebut?",
+              o: ["500 Joule", "Tergantung waktu mendorong", "Nol (0) Joule", "Tak terhingga"], a: 2 },
+            { q: "Satuan Internasional (SI) untuk Usaha dan Energi adalah...",
+              o: ["Newton", "Joule", "Watt", "Pascal"], a: 1 },
+            { q: "Dua buah gaya yang searah F1 = 40 N dan F2 = 60 N digunakan untuk mendorong lemari hingga berpindah sejauh 2 meter. Usaha totalnya adalah...",
+              o: ["40 J", "200 J", "100 J", "240 J"], a: 1 }, // (40+60)*2 = 200
+            
+            // Konsep Energi
+            { q: "Energi yang dimiliki oleh burung yang sedang terbang tinggi adalah...",
+              o: ["Energi Potensial saja", "Energi Kinetik saja", "Energi Mekanik (Potensial + Kinetik)", "Energi Kimia"], a: 2 },
+            { q: "Sebuah kelapa bermassa 2 kg berada di pohon yang tingginya 10 meter (g = 10 m/s²). Energi potensial kelapa tersebut adalah...",
+              o: ["20 Joule", "100 Joule", "200 Joule", "1000 Joule"], a: 2 },
+            { q: "Rumus energi kinetik suatu benda yang bergerak dengan kecepatan v dan massa m adalah...",
+              o: ["Ek = m.g.h", "Ek = m.v", "Ek = ½ m.v²", "Ek = ½ m.v"], a: 2 },
+            { q: "Benda A (massa m, kec v) dan Benda B (massa 2m, kec v). Perbandingan energi kinetik A dan B adalah...",
+              o: ["1 : 1", "1 : 2", "2 : 1", "1 : 4"], a: 1 },
+            
+            // Perubahan Bentuk Energi (Integrasi)
+            { q: "Hukum Kekekalan Energi menyatakan bahwa...",
+              o: ["Energi dapat diciptakan dari kehampaan", "Energi selalu berkurang setiap waktu", "Energi tidak dapat diciptakan/dimusnahkan, hanya berubah bentuk", "Energi kinetik selalu sama dengan energi potensial"], a: 2 },
+            { q: "Dalam QS. Al-Qamar ayat 49, 'Kami menciptakan segala sesuatu menurut ukuran', dalam fisika erat kaitannya dengan hukum...",
+              o: ["Hukum Newton I", "Hukum Kekekalan Energi (Takaran yang konstan)", "Hukum Gravitasi", "Hukum Archimedes"], a: 1 },
+            { q: "Perubahan energi yang terjadi pada Pembangkit Listrik Tenaga Air (PLTA) secara berurutan adalah...",
+              o: ["Potensial -> Kinetik -> Listrik", "Kinetik -> Potensial -> Listrik", "Listrik -> Kinetik -> Potensial", "Kimia -> Panas -> Listrik"], a: 0 },
+            { q: "Usaha manusia (ikhtiar) dalam fisika dianalogikan sebagai gaya yang menghasilkan perpindahan. Nilai yang disinggung dalam QS. Al-Lail ayat 4 tentang usaha yang bermacam-macam menunjukkan...",
+              o: ["Usaha hanya bernilai positif", "Usaha bisa positif, negatif (berlawanan arah), atau nol", "Usaha selalu menghasilkan uang", "Usaha tidak butuh energi"], a: 1 },
+
+            // Hubungan Usaha & Energi
+            { q: "Teorema Usaha-Energi menyatakan bahwa besar usaha yang dilakukan pada benda sama dengan...",
+              o: ["Perubahan kecepatannya", "Perubahan massanya", "Perubahan energi kinetiknya", "Waktu yang dibutuhkan"], a: 2 },
+            { q: "Sebuah mobil mengerem dari kecepatan 20 m/s menjadi berhenti (0 m/s). Energi kinetik mobil...",
+              o: ["Bertambah", "Tetap", "Menjadi Nol", "Menjadi tak terhingga"], a: 2 },
+            
+            // Daya
+            { q: "Usaha yang dilakukan tiap satuan waktu disebut...",
+              o: ["Gaya", "Daya", "Momentum", "Impuls"], a: 1 },
+            { q: "Mesin A melakukan usaha 1000 J dalam 5 detik. Mesin B melakukan usaha 1000 J dalam 10 detik. Maka...",
+              o: ["Daya A > Daya B", "Daya A < Daya B", "Daya A = Daya B", "Mesin B lebih kuat"], a: 0 }, // A: 200W, B: 100W
+
+            // HOTS (Analisis)
+            { q: "[HOTS] Sebuah benda jatuh bebas dari ketinggian h. Pada ketinggian ½ h dari tanah, manakah pernyataan yang BENAR? (Abaikan gesekan udara)",
+              o: ["Energi Potensial maksimal", "Energi Kinetik maksimal", "Energi Kinetik = Energi Potensial", "Energi Mekanik = 0"], a: 2 },
+            { q: "[HOTS] Mobil melaju 40 km/jam butuh jarak rem 20 m. Jika mobil melaju 80 km/jam, jarak rem yang dibutuhkan adalah...",
+              o: ["20 m", "40 m", "60 m", "80 m"], a: 3 }, // Kecepatan 2x -> Ek 4x -> s 4x = 80m
+            { q: "[HOTS] Sebuah balok ditarik gaya F ke kanan, tapi ada gaya gesek f ke kiri. Jika balok bergerak ke kanan, maka usaha oleh gaya gesek bernilai...",
+              o: ["Positif karena searah gravitasi", "Nol karena gaya gesek", "Negatif karena berlawanan dengan arah perpindahan", "Sama dengan gaya F"], a: 2 },
+            { q: "[HOTS] Mengapa saat kita meluncur di perosotan yang kasar, celana kita terasa panas?",
+              o: ["Karena gaya gravitasi menarik ke bawah", "Sebagian energi mekanik diubah menjadi energi panas oleh gaya gesek (non-konservatif)", "Karena energi potensial bertambah", "Tidak ada perubahan energi"], a: 1 }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let selectedAnswers = [];
+
+        function startQuiz() {
+            document.getElementById('quizStartPanel').classList.add('hidden');
+            document.getElementById('quizQuestionPanel').classList.remove('hidden');
+            currentQ = 0;
+            score = 0;
+            selectedAnswers = new Array(quizData.length).fill(null);
+            document.getElementById('qScore').innerText = score;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = quizData[currentQ];
+            document.getElementById('qNumber').innerText = currentQ + 1;
+            document.getElementById('questionText').innerText = q.q;
+            
+            const optsCont = document.getElementById('optionsContainer');
+            optsCont.innerHTML = '';
+            
+            q.o.forEach((opt, index) => {
+                const label = document.createElement('label');
+                label.className = 'option-label flex items-start';
+                
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'q_option';
+                input.value = index;
+                input.className = 'mt-1 mr-3 text-rose-600 focus:ring-rose-500';
+                
+                // If previously answered in this session (though not currently implemented backward nav)
+                if(selectedAnswers[currentQ] === index) input.checked = true;
+
+                input.addEventListener('change', checkAnswer);
+
+                const span = document.createElement('span');
+                span.className = 'text-gray-700';
+                span.innerText = opt;
+
+                label.appendChild(input);
+                label.appendChild(span);
+                optsCont.appendChild(label);
+            });
+
+            document.getElementById('btnNextQuestion').classList.add('hidden');
+            document.getElementById('feedbackText').classList.add('hidden');
+        }
+
+        function checkAnswer(e) {
+            const selectedIdx = parseInt(e.target.value);
+            selectedAnswers[currentQ] = selectedIdx;
+            
+            const q = quizData[currentQ];
+            const isCorrect = (selectedIdx === q.a);
+            
+            // Disable all inputs
+            const inputs = document.querySelectorAll('input[name="q_option"]');
+            inputs.forEach(inp => inp.disabled = true);
+
+            // Highlight answers
+            const labels = document.querySelectorAll('.option-label');
+            labels.forEach((lbl, idx) => {
+                if (idx === q.a) lbl.classList.add('correct-answer');
+                if (idx === selectedIdx && !isCorrect) lbl.classList.add('wrong-answer');
+            });
+
+            // Feedback
+            const feedback = document.getElementById('feedbackText');
+            feedback.classList.remove('hidden');
+            if(isCorrect) {
+                feedback.innerHTML = '<i class="fas fa-check-circle text-green-500 text-lg"></i> <span class="text-green-600">Benar!</span>';
+                score += 5; // 20 questions * 5 = 100 max
+                document.getElementById('qScore').innerText = score;
+            } else {
+                feedback.innerHTML = '<i class="fas fa-times-circle text-red-500 text-lg"></i> <span class="text-red-600">Kurang Tepat.</span>';
+            }
+
+            document.getElementById('btnNextQuestion').classList.remove('hidden');
+        }
+
+        document.getElementById('btnNextQuestion').addEventListener('click', () => {
+            currentQ++;
+            if(currentQ < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        });
+
+        function showResult() {
+            document.getElementById('quizQuestionPanel').classList.add('hidden');
+            document.getElementById('quizResultPanel').classList.remove('hidden');
+            document.getElementById('finalScore').innerText = score;
+            
+            let msg = "";
+            if(score >= 85) msg = "Luar Biasa! Pemahamanmu setingkat Ilmuwan Fisika muda.";
+            else if(score >= 70) msg = "Kerja Bagus! Kamu sudah memahami konsep dasar dengan baik.";
+            else msg = "Jangan menyerah! Coba baca kembali materi dan coba lagi ya.";
+            
+            document.getElementById('resultMessage').innerText = msg;
+        }
+
+        function resetQuiz() {
+            document.getElementById('quizResultPanel').classList.add('hidden');
+            document.getElementById('quizStartPanel').classList.remove('hidden');
+        }
+
+        // Initialize first view
+        showSection('beranda');
+        window.addEventListener('load', () => {
+            // initial setup if needed on load
+        });
+    </script>
+</body>
+</html>
